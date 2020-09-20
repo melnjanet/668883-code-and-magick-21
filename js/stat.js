@@ -39,7 +39,6 @@ const BarCoordinate = {
 const Font = {
   SIZE_PX: `16px`,
   FAMILY: `PT Mono`,
-  COLOR: `#000`,
   SIZE: 15
 };
 
@@ -48,64 +47,37 @@ const renderCloud = (ctx, x, y, color) => {
   ctx.fillRect(x, y, Cloud.WIDTH, Cloud.HEIGHT);
 };
 
+const renderText = (ctx, text, x, y, color = `#000`) => {
+  ctx.fillStyle = color;
+  ctx.fillText(text, x, y);
+};
+
+const renderBar = (ctx, x, y, width, height, color) => {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, width, height);
+};
+
 window.renderStatistics = (ctx, players, times) => {
   const maxTime = Math.round(Math.max(...times));
   const gapBetweenBars = BarSize.WIDTH + Gap.HORIZONTAL;
   let currentBarX = BarCoordinate.INITIAL_X;
-
-  renderCloud(
-      ctx,
-      CloudCoordinate.INITIAL_X + Cloud.GAP,
-      CloudCoordinate.INITIAL_Y + Cloud.GAP,
-      `rgba(0, 0, 0, 0.7)`
-  );
-  renderCloud(
-      ctx,
-      CloudCoordinate.INITIAL_X,
-      CloudCoordinate.INITIAL_Y,
-      `#fff`
-  );
-
   ctx.font = `${Font.SIZE_PX} ${Font.FAMILY}`;
-  ctx.fillStyle = Font.COLOR;
   ctx.textBaseline = `hanging`;
-  ctx.fillText(
-      `Ура вы победили!`,
-      CloudCoordinate.INITIAL_X + Gap.LEFT,
-      CloudCoordinate.INITIAL_Y + Gap.TOP);
-  ctx.fillText(`Список результатов:`,
-      CloudCoordinate.INITIAL_X + Gap.LEFT,
-      CloudCoordinate.INITIAL_Y + Font.SIZE + Gap.TOP);
+
+  renderCloud(ctx, CloudCoordinate.INITIAL_X + Cloud.GAP, CloudCoordinate.INITIAL_Y + Cloud.GAP, `rgba(0, 0, 0, 0.7)`);
+  renderCloud(ctx, CloudCoordinate.INITIAL_X, CloudCoordinate.INITIAL_Y, `#fff`);
+  renderText(ctx, `Ура вы победили!`, CloudCoordinate.INITIAL_X + Gap.LEFT, CloudCoordinate.INITIAL_Y + Gap.TOP);
+  renderText(ctx, `Список результатов:`, CloudCoordinate.INITIAL_X + Gap.LEFT, CloudCoordinate.INITIAL_Y + Font.SIZE + Gap.TOP);
 
   for (let i = 0; i < players.length; i++) {
     const barHeight = Math.round((BarSize.MAX_HEIGHT * times[i]) / maxTime);
     const currentUserTimeY = Cloud.HEIGHT - barHeight - Gap.VERTICAL * 2 - Gap.TOP;
+    const saturation = Math.floor(Math.random(MIN_SATURATION) * MAX_SATURATION);
+    const barColor = players[i] === CurrentPlayer.NAME ? CurrentPlayer.BAR_COLOR : `hsl(237, 74%, ${saturation}%)`;
 
-    ctx.fillStyle = Font.COLOR;
-    ctx.fillText(
-        players[i],
-        currentBarX,
-        BarCoordinate.INITIAL_Y + Gap.VERTICAL
-    );
-    ctx.fillText(
-        Math.round(times[i]),
-        currentBarX,
-        currentUserTimeY
-    );
-
-    if (players[i] === CurrentPlayer.NAME) {
-      ctx.fillStyle = CurrentPlayer.BAR_COLOR;
-    } else {
-      const saturation = Math.floor(Math.random(MIN_SATURATION) * MAX_SATURATION);
-      ctx.fillStyle = `hsl(237, 74%, ${saturation}%)`;
-    }
-
-    ctx.fillRect(
-        currentBarX,
-        BarCoordinate.INITIAL_Y,
-        BarSize.WIDTH,
-        -barHeight
-    );
+    renderText(ctx, players[i], currentBarX, BarCoordinate.INITIAL_Y + Gap.VERTICAL);
+    renderText(ctx, Math.round(times[i]), currentBarX, currentUserTimeY);
+    renderBar(ctx, currentBarX, BarCoordinate.INITIAL_Y, BarSize.WIDTH, -barHeight, barColor);
 
     currentBarX += gapBetweenBars;
   }
