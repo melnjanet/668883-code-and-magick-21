@@ -1,5 +1,4 @@
 "use strict";
-
 const WIZARDS_AMOUNT = 4;
 
 const WIZARD_NAMES = [
@@ -41,10 +40,27 @@ const WIZARD_EYES_COLORS = [
   `green`
 ];
 
-const userDialog = document.querySelector(`.setup`);
-userDialog.classList.remove(`hidden`);
+const FIREBALL_COLORS = [
+  `#ee4830`,
+  `#30a8ee`,
+  `#5ce6c0`,
+  `#e848d5`,
+  `#e6e848`,
+];
 
-const similarListElement = userDialog.querySelector(`.setup-similar-list`);
+const setup = document.querySelector(`.setup`);
+const setupOpen = document.querySelector(`.setup-open`);
+const setupClose = setup.querySelector(`.setup-close`);
+const setupSubmit = setup.querySelector(`.setup-submit`);
+const similarListElement = setup.querySelector(`.setup-similar-list`);
+const wizardCoat = setup.querySelector(`.setup-wizard .wizard-coat`);
+const wizardEyes = setup.querySelector(`.setup-wizard .wizard-eyes`);
+const fireball = setup.querySelector(`.setup-fireball-wrap`);
+const setupUserName = setup.querySelector(`.setup-user-name`);
+const inputCoatColor = setup.querySelector(`input[name=coat-color]`);
+const inputEyesColor = setup.querySelector(`input[name=eyes-color]`);
+const inputFireballColor = setup.querySelector(`input[name=fireball-color]`);
+
 
 const similarWizardTemplate = document.querySelector(`#similar-wizard-template`).content
   .querySelector(`.setup-similar-item`);
@@ -54,6 +70,111 @@ const fragment = document.createDocumentFragment();
 const getRandomData = (item) => {
   return item[Math.floor(Math.random() * item.length)];
 };
+
+
+const setCloseHandler = () => {
+  setup.classList.add(`hidden`);
+};
+
+const setOpenHandler = () => {
+  setup.classList.remove(`hidden`);
+};
+
+
+const onPopupEscPress = (evt) => {
+  if (evt.key === `Escape` && evt.target.name !== `username`) {
+    evt.preventDefault();
+    closePopup();
+  }
+};
+
+const setCloseEnterHandler = (evt) => {
+  if (evt.key === `Enter`) {
+    closePopup();
+  }
+};
+
+const setOpenEnterHandler = (evt) => {
+  if (evt.key === `Enter`) {
+    evt.preventDefault();
+    openPopup();
+  }
+};
+
+const openPopup = () => {
+  setOpenHandler();
+  document.addEventListener(`keydown`, onPopupEscPress);
+};
+
+const closePopup = () => {
+  setCloseHandler();
+  document.removeEventListener(`keydown`, onPopupEscPress);
+};
+
+const setHiddenValues = (input, value) => {
+  input.value = value;
+};
+
+const setCustomColor = (element, attribute, colors, hiddenInput) => {
+  const currentColor = getRandomData(colors);
+
+  if (attribute === `fill`) {
+    element.style.fill = currentColor;
+  } else if (attribute === `background`) {
+    element.style.background = currentColor;
+  }
+
+  setHiddenValues(hiddenInput, currentColor);
+};
+
+const setValidationUserNameHandler = () => {
+  if (setupUserName.validity.tooShort) {
+    setupUserName.setCustomValidity(`Имя должно состоять минимум из 2-х символов`);
+  } else if (setupUserName.validity.tooLong) {
+    setupUserName.setCustomValidity(`Имя не должно превышать 25-ти символов`);
+  } else if (setupUserName.validity.valueMissing) {
+    setupUserName.setCustomValidity(`Обязательное поле`);
+  } else {
+    setupUserName.setCustomValidity(``);
+  }
+};
+
+setupOpen.addEventListener(`click`, () => {
+  openPopup();
+});
+
+setupOpen.addEventListener(`keydown`, (evt) => {
+  setOpenEnterHandler(evt);
+});
+
+setupClose.addEventListener(`click`, () => {
+  closePopup();
+});
+
+setupClose.addEventListener(`keydown`, (evt) => {
+  setCloseEnterHandler(evt);
+});
+
+setupSubmit.addEventListener(`keydown`, (evt) => {
+  setCloseEnterHandler(evt);
+});
+
+wizardCoat.addEventListener(`click`, () => {
+  setCustomColor(wizardCoat, `fill`, WIZARD_COAT_COLORS, inputCoatColor);
+});
+
+wizardEyes.addEventListener(`click`, () => {
+  setCustomColor(wizardEyes, `fill`, WIZARD_EYES_COLORS, inputEyesColor);
+});
+
+fireball.addEventListener(`click`, () => {
+  setCustomColor(fireball, `background`, FIREBALL_COLORS, inputFireballColor);
+});
+
+setupUserName.addEventListener(`invalid`, () => {
+  setValidationUserNameHandler();
+});
+
 
 const setWizardsAppearance = () => {
   const wizards = [];
@@ -89,7 +210,7 @@ const renderWizardAppearance = (wizards) => {
   }
 
   similarListElement.appendChild(fragment);
-  userDialog.querySelector(`.setup-similar`).classList.remove(`hidden`);
+  setup.querySelector(`.setup-similar`).classList.remove(`hidden`);
 };
 
 const wizards = setWizardsAppearance();
