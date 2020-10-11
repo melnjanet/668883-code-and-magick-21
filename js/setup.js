@@ -3,28 +3,6 @@
 (() => {
   const WIZARDS_AMOUNT = 4;
 
-  const WIZARD_NAMES = [
-    `Иван`,
-    `Хуан Себастьян`,
-    `Мария`,
-    `Кристоф`,
-    `Виктор`,
-    `Юлия`,
-    `Люпита`,
-    `Вашингтон`,
-  ];
-
-  const WIZARD_SURNAMES = [
-    `да Марья`,
-    `Верон`,
-    `Мирабелла`,
-    `Вальц`,
-    `Онопко`,
-    `Топольницкая`,
-    `Нионго`,
-    `Ирвинг`,
-  ];
-
   const WIZARD_COAT_COLORS = [
     `rgb(101, 137, 164)`,
     `rgb(241, 43, 107)`,
@@ -45,50 +23,45 @@
   const setup = document.querySelector(`.setup`);
   const similarListElement = setup.querySelector(`.setup-similar-list`);
   const similarWizardTemplate = document.querySelector(`#similar-wizard-template`).content.querySelector(`.setup-similar-item`);
-  const fragment = document.createDocumentFragment();
-
-  const setWizardsAppearance = () => {
-    const wizards = [];
-
-    for (let i = 0; i < WIZARDS_AMOUNT; i++) {
-      const name = [window.util.getRandomData(WIZARD_NAMES), window.util.getRandomData(WIZARD_SURNAMES)].sort(function () {
-        return 0.5 - Math.random();
-      });
-
-      wizards.push({
-        name: `${name[0]}  ${name[1]}`,
-        coatColor: window.util.getRandomData(WIZARD_COAT_COLORS),
-        eyesColor: window.util.getRandomData(WIZARD_EYES_COLORS),
-      });
-    }
-
-    return wizards;
-  };
 
   const renderWizard = (wizard) => {
     const wizardElement = similarWizardTemplate.cloneNode(true);
 
     wizardElement.querySelector(`.setup-similar-label`).textContent = wizard.name;
-    wizardElement.querySelector(`.wizard-coat`).style.fill = wizard.coatColor;
-    wizardElement.querySelector(`.wizard-eyes`).style.fill = wizard.eyesColor;
+    wizardElement.querySelector(`.wizard-coat`).style.fill = wizard.colorCoat;
+    wizardElement.querySelector(`.wizard-eyes`).style.fill = wizard.colorEyes;
 
     return wizardElement;
   };
 
-  const renderWizardAppearance = (wizards) => {
-    for (let i = 0; i < wizards.length; i++) {
-      fragment.appendChild(renderWizard(wizards[i]));
+  const errorHandler = (errorMessage) => {
+    const errorNode = document.createElement(`div`);
+    errorNode.style = `z-index: 100; margin: 0 auto; text-align: center; background-color: red;`;
+    errorNode.style.position = `absolute`;
+    errorNode.style.left = 0;
+    errorNode.style.right = 0;
+    errorNode.style.fontSize = `30px`;
+
+    errorNode.textContent = errorMessage;
+    document.body.insertAdjacentElement(`afterbegin`, errorNode);
+  };
+
+  const successHandler = (wizards) => {
+    const fragment = document.createDocumentFragment();
+    const randomWizards = window.util.setRandomArrayData(wizards);
+
+    for (let i = 0; i < WIZARDS_AMOUNT; i++) {
+      fragment.appendChild(renderWizard(randomWizards[i]));
     }
 
     similarListElement.appendChild(fragment);
     setup.querySelector(`.setup-similar`).classList.remove(`hidden`);
   };
 
-  const wizards = setWizardsAppearance();
-  renderWizardAppearance(wizards);
-
+  window.backend.load(successHandler, errorHandler);
   window.setup = {
     wizardCoatColor: WIZARD_COAT_COLORS,
     wizardEyesColor: WIZARD_EYES_COLORS,
+    errorHandler,
   };
 })();

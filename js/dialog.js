@@ -8,6 +8,7 @@
   const setupOpen = document.querySelector(`.setup-open`);
   const setupClose = setup.querySelector(`.setup-close`);
   const setupSubmit = setup.querySelector(`.setup-submit`);
+  const form = setup.querySelector(`.setup-wizard-form`);
 
   const setupInitialPosition = () => {
     if (setup.style.left !== INITIAL_DIALOG_X || setup.style.top !== INITIAL_DIALOG_Y) {
@@ -74,5 +75,10 @@
 
   setupSubmit.addEventListener(`keydown`, (evt) => {
     setCloseEnterHandler(evt);
+  });
+
+  form.addEventListener(`submit`, (evt) => {
+    window.backend.save(setCloseHandler, window.setup.errorHandler, new FormData(form));
+    evt.preventDefault();
   });
 })();
